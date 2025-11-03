@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import { flushSync } from 'react-dom';
 import { ChatMessage, StreamingEvent, ToolCall, ConversationState } from '@/src/types/agent';
 import { AgentService } from '@/src/services/AgentService';
 import { StreamingService } from '@/src/services/StreamingService';
@@ -21,7 +22,7 @@ export const useAgentChat = (agentId: string) => {
   const addMessage = useCallback((message: Omit<ChatMessage, 'id' | 'timestamp'>) => {
     const newMessage: ChatMessage = {
       ...message,
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       timestamp: new Date()
     };
     
@@ -45,7 +46,7 @@ export const useAgentChat = (agentId: string) => {
   const addToolCall = useCallback((toolCall: Omit<ToolCall, 'id' | 'timestamp'>) => {
     const newToolCall: ToolCall = {
       ...toolCall,
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       timestamp: new Date()
     };
     
@@ -68,7 +69,8 @@ export const useAgentChat = (agentId: string) => {
 
   const sendMessage = useCallback(async (content: string, useStreaming = true) => {
     // Add user message
-    addMessage({ type: 'user', content });
+    const userMessageId = addMessage({ type: 'user', content });
+    console.log('Added user message with ID:', userMessageId);
     
     // Reset states
     setState(prev => ({
@@ -122,6 +124,7 @@ export const useAgentChat = (agentId: string) => {
       streaming: true,
       events: []
     });
+    console.log('Added assistant message with ID:', assistantMessageId);
 
     let fullContent = '';
     const events: StreamingEvent[] = [];
@@ -141,9 +144,12 @@ export const useAgentChat = (agentId: string) => {
         switch (event.type) {
           case 'content':
             fullContent += event.content;
-            updateMessage(assistantMessageId, { 
-              content: fullContent,
-              events: [...events]
+            // Force immediate React update for smoother streaming
+            flushSync(() => {
+              updateMessage(assistantMessageId, { 
+                content: fullContent,
+                events: [...events]
+              });
             });
             break;
             

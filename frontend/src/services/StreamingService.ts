@@ -59,6 +59,7 @@ export class StreamingService {
 
             try {
               const event: StreamingEvent = JSON.parse(data);
+              // Process events immediately without batching
               onEvent(event);
             } catch (parseError) {
               console.warn('Failed to parse streaming event:', data);

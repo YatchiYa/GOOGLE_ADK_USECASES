@@ -4,6 +4,7 @@ import { ChatMessage } from "./ChatMessage";
 import { ModernChatInput } from "./ModernChatInput";
 import { ImprovedFloatingToolPanel } from "./ImprovedFloatingToolPanel";
 import { AgentSelector } from "./AgentSelector";
+import { GmailAuthPanel } from "./GmailAuthPanel";
 import { Card, CardHeader, CardTitle } from "@/src/components/ui/Card";
 import { Button } from "@/src/components/ui/Button";
 
@@ -54,6 +55,16 @@ export const MultiAgentChatInterface: React.FC<
           title: "Expert Web Searcher",
           description:
             "Advanced web search, data analysis, and comprehensive report generation",
+        },
+        brevo_expert: {
+          title: "Brevo Expert",
+          description:
+            "Contact management, email operations, and comprehensive Brevo API integration",
+        },
+        gmail_expert: {
+          title: "Gmail & Calendar Expert",
+          description:
+            "Gmail email management, Google Calendar events, and comprehensive productivity tools",
         },
       };
 
@@ -232,6 +243,48 @@ export const MultiAgentChatInterface: React.FC<
                           <span>Academic writing and citations</span>
                         </li>
                       </>
+                    ) : selectedAgentId === "brevo_expert" ? (
+                      <>
+                        <li className="flex items-center space-x-2">
+                          <span>📧</span>
+                          <span>Contact creation, updates, and management</span>
+                        </li>
+                        <li className="flex items-center space-x-2">
+                          <span>📊</span>
+                          <span>Bulk contact operations and data import</span>
+                        </li>
+                        <li className="flex items-center space-x-2">
+                          <span>✉️</span>
+                          <span>Transactional email sending and templates</span>
+                        </li>
+                        <li className="flex items-center space-x-2">
+                          <span>🔧</span>
+                          <span>Brevo API integration and troubleshooting</span>
+                        </li>
+                      </>
+                    ) : selectedAgentId === "gmail_expert" ? (
+                      <>
+                        <li className="flex items-center space-x-2">
+                          <span>📧</span>
+                          <span>Read and manage Gmail emails with advanced filtering</span>
+                        </li>
+                        <li className="flex items-center space-x-2">
+                          <span>📤</span>
+                          <span>Send emails with attachments and rich content</span>
+                        </li>
+                        <li className="flex items-center space-x-2">
+                          <span>📅</span>
+                          <span>Manage Google Calendar events and scheduling</span>
+                        </li>
+                        <li className="flex items-center space-x-2">
+                          <span>🔍</span>
+                          <span>Advanced search for emails and calendar events</span>
+                        </li>
+                        <li className="flex items-center space-x-2">
+                          <span>🔐</span>
+                          <span>Secure OAuth authentication for Gmail & Calendar</span>
+                        </li>
+                      </>
                     ) : (
                       <>
                         <li className="flex items-center space-x-2">
@@ -255,6 +308,16 @@ export const MultiAgentChatInterface: React.FC<
                       </>
                     )}
                   </ul>
+                  
+                  {/* Gmail Authentication Panel */}
+                  {selectedAgentId === "gmail_expert" && (
+                    <div className="mt-4">
+                      <GmailAuthPanel onAuthSuccess={() => {
+                        // Optionally refresh or show success message
+                        console.log('Gmail authentication successful');
+                      }} />
+                    </div>
+                  )}
                 </div>
               </Card>
             )}

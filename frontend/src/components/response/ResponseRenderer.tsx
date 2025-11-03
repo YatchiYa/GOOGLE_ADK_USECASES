@@ -20,19 +20,22 @@ export const ResponseRenderer: React.FC<ResponseRendererProps> = ({
 
   return (
     <div className="response-content">
-      {/* Streaming cursor */}
-      {isStreaming && (
-        <div className="bg-gray-50 rounded-md p-4 border-l-4 border-blue-500">
-          <div className="flex items-center space-x-2 mb-2">
+      {/* Streaming content with cursor */}
+      {isStreaming && content && (
+        <div className="space-y-4">
+          <MarkdownRenderer content={content} />
+          <div className="flex items-center space-x-2">
             <div className="animate-pulse w-2 h-2 bg-blue-500 rounded-full"></div>
-            <span className="text-sm text-gray-600">
-              Generating response...
-            </span>
+            <span className="animate-pulse text-blue-500 font-mono">▋</span>
           </div>
-          <div className="font-mono text-sm text-gray-700">
-            <MarkdownRenderer content={content} />
-            <span className="animate-pulse text-blue-500">▋</span>
-          </div>
+        </div>
+      )}
+
+      {/* Loading state when streaming but no content yet */}
+      {isStreaming && !content && (
+        <div className="flex items-center space-x-2">
+          <div className="animate-pulse w-2 h-2 bg-blue-500 rounded-full"></div>
+          <span className="text-sm text-gray-600">Generating response...</span>
         </div>
       )}
 

@@ -65,9 +65,11 @@ class StreamingHandler:
     """
     
     def __init__(self, 
-                 update_interval_ms: int = 16,  # 60fps
-                 batch_size: int = 3,
-                 agent_manager=None):
+                 update_interval_ms: int = 8,   # 120fps for smoother streaming
+                 batch_size: int = 1,           # Send each chunk immediately
+                 agent_manager=None,
+                 session_service=None,
+                 memory_service=None):
         """
         Initialize streaming handler
         
@@ -79,7 +81,9 @@ class StreamingHandler:
         self.update_interval = update_interval_ms / 1000  # Convert to seconds
         self.batch_size = batch_size
         self.agent_manager = agent_manager
-        self.buffer_timeout = 0.1
+        self.session_service = session_service
+        self.memory_service = memory_service
+        self.buffer_timeout = 0.01  # Reduced timeout for more responsive streaming
         
         # Session management
         self._active_sessions: Dict[str, StreamingSession] = {}
@@ -99,7 +103,7 @@ class StreamingHandler:
         logger.info(f"Streaming handler initialized (interval: {update_interval_ms}ms, batch: {batch_size})")
 
     async def start_streaming_session(self, session_id: str, agent_id: str, user_id: str, 
-                                     agent, message: str) -> AsyncGenerator[StreamingEvent, None]:
+                                     agent, message: str, adk_session=None) -> AsyncGenerator[StreamingEvent, None]:
         """
         Start a streaming session with an agent using proper ADK streaming
         
@@ -142,20 +146,30 @@ class StreamingHandler:
                 }
             )
             
-            # Create session service and runner with proper streaming config
-            session_service = InMemorySessionService()
+            # Use provided session service or create new one
+            if self.session_service:
+                session_service = self.session_service
+                app_name = "adk_app"
+            else:
+                session_service = InMemorySessionService()
+                app_name = "adk_streaming"
             
             runner = Runner(
-                app_name="adk_streaming",
+                app_name=app_name,
                 agent=agent,
-                session_service=session_service
+                session_service=session_service,
+                memory_service=self.memory_service
             )
             
-            # Create session
-            session = await session_service.create_session(
-                app_name="adk_streaming",
-                user_id=user_id
-            )
+            # Use existing session or create new one
+            if adk_session:
+                session = adk_session
+            else:
+                session = await session_service.create_session(
+                    app_name=app_name,
+                    user_id=user_id,
+                    session_id=session_id
+                )
             
             # Configure streaming
             run_config = RunConfig(streaming_mode=StreamingMode.SSE)
@@ -174,7 +188,9 @@ class StreamingHandler:
                 
                 # Handle ADK streaming events
                 event_processed = False
-                
+ 
+                print("event > ", event)          
+                print("\n\n") 
                 # Handle sub-agent start events
                 if hasattr(event, 'event_type') and event.event_type == 'sub_agent_start':
                     yield StreamingEvent(
@@ -431,10 +447,11 @@ class StreamingHandler:
                           agent_id: str,
                           user_id: str,
                           agent,
-                          message: str) -> AsyncGenerator[str, None]:
+                          message: str,
+                          adk_session=None) -> AsyncGenerator[str, None]:
         """Stream responses in Server-Sent Events format"""
         async for event in self.start_streaming_session(
-            session_id, agent_id, user_id, agent, message
+            session_id, agent_id, user_id, agent, message, adk_session
         ):
             # Format as SSE
             sse_data = {

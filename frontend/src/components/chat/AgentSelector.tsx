@@ -32,6 +32,16 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({
       name: "Expert Web Searcher",
       description: "Advanced web search, data analysis, and report generation",
       icon: "🔍"
+    },
+    brevo_expert: {
+      name: "Brevo Expert",
+      description: "Contact management, email operations, and Brevo API integration",
+      icon: "📧"
+    },
+    gmail_expert: {
+      name: "Gmail & Calendar Expert",
+      description: "Gmail email management, Google Calendar events, and productivity tools",
+      icon: "📅"
     }
   };
 
@@ -65,6 +75,14 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({
         {
           id: "expert_web_searcher", 
           ...agentConfigs.expert_web_searcher
+        },
+        {
+          id: "brevo_expert",
+          ...agentConfigs.brevo_expert
+        },
+        {
+          id: "gmail_expert",
+          ...agentConfigs.gmail_expert
         }
       ]);
     } finally {

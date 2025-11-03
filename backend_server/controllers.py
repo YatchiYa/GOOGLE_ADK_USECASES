@@ -113,6 +113,7 @@ class AgentController:
         agent_name = getattr(agent, 'name', agent_id)
         agent_model = getattr(agent, 'model', 'unknown')
         agent_instruction = getattr(agent, 'instruction', '')
+        print("agent_instruction >> ", agent_instruction)
         
         # Extract tools information
         tools = []

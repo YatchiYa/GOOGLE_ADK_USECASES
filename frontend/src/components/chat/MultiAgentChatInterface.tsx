@@ -5,6 +5,7 @@ import { ModernChatInput } from "./ModernChatInput";
 import { ImprovedFloatingToolPanel } from "./ImprovedFloatingToolPanel";
 import { AgentSelector } from "./AgentSelector";
 import { GmailAuthPanel } from "./GmailAuthPanel";
+import { AgentInfoPanel } from "./AgentInfoPanel";
 import { Card, CardHeader, CardTitle } from "@/src/components/ui/Card";
 import { Button } from "@/src/components/ui/Button";
 
@@ -214,15 +215,22 @@ export const MultiAgentChatInterface: React.FC<
           <div className="max-w-7xl mx-auto px-2 py-8">
             {/* Welcome Message */}
             {messages.length === 0 && (
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <span>👋</span>
-                    <span>Welcome to {agentTitle}</span>
-                  </CardTitle>
-                </CardHeader>
-                <div className="px-6 pb-6">
-                  <p className="text-gray-600 mb-4">I can help you with:</p>
+              <div className="space-y-6">
+                {/* Agent Information Panel */}
+                <AgentInfoPanel 
+                  agentId={selectedAgentId}
+                  className="mb-4"
+                />
+                
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <span>👋</span>
+                      <span>Welcome to {agentTitle}</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <div className="px-6 pb-6">
+                    <p className="text-gray-600 mb-4">I can help you with:</p>
                   <ul className="space-y-2 text-sm text-gray-700">
                     {selectedAgentId === "academic_coordinator" ? (
                       <>
@@ -320,6 +328,7 @@ export const MultiAgentChatInterface: React.FC<
                   )}
                 </div>
               </Card>
+              </div>
             )}
 
             {/* Error Display */}

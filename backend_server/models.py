@@ -67,6 +67,21 @@ class AgentListResponse(BaseModel):
     agents: List[str]
     count: int
 
+class ToolInfo(BaseModel):
+    name: str
+    description: str = ""
+    parameters: Dict[str, Any] = {}
+
+class AgentDetailResponse(BaseModel):
+    agent_id: str
+    name: str
+    model: str
+    description: str = ""
+    instruction: str = ""
+    tools: List[ToolInfo] = []
+    capabilities: List[str] = []
+    status: str = "active"
+
 class HealthResponse(BaseModel):
     message: str
     status: str = "healthy"

@@ -99,6 +99,126 @@ class AgentController:
             count=len(self.agent_registry)
         )
 
+    def get_agent_details(self, agent_id: str) -> AgentDetailResponse:
+        """Get detailed information about a specific agent"""
+        if agent_id not in self.agent_registry:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Agent '{agent_id}' not found. Available agents: {list(self.agent_registry.keys())}"
+            )
+        
+        agent = self.agent_registry[agent_id]
+        
+        # Extract agent information
+        agent_name = getattr(agent, 'name', agent_id)
+        agent_model = getattr(agent, 'model', 'unknown')
+        agent_instruction = getattr(agent, 'instruction', '')
+        
+        # Extract tools information
+        tools = []
+        if hasattr(agent, 'tools') and agent.tools:
+            for tool in agent.tools:
+                tool_info = ToolInfo(
+                    name=getattr(tool, 'name', getattr(tool, '__name__', 'unknown')),
+                    description=getattr(tool, 'description', getattr(tool, '__doc__', '')),
+                    parameters=getattr(tool, 'parameters', {})
+                )
+                tools.append(tool_info)
+        
+        # Define capabilities based on agent type and tools
+        capabilities = self._extract_agent_capabilities(agent_id, agent, tools)
+        
+        # Create description based on agent type
+        description = self._get_agent_description(agent_id, agent_name)
+        
+        return AgentDetailResponse(
+            agent_id=agent_id,
+            name=agent_name,
+            model=agent_model,
+            description=description,
+            instruction=agent_instruction,
+            tools=tools,
+            capabilities=capabilities,
+            status="active"
+        )
+
+    def _extract_agent_capabilities(self, agent_id: str, agent, tools: List[ToolInfo]) -> List[str]:
+        """Extract capabilities based on agent type and tools"""
+        capabilities = []
+        
+        # Tool-based capabilities
+        tool_names = [tool.name.lower() for tool in tools]
+        
+        if any('gmail' in name or 'email' in name for name in tool_names):
+            capabilities.extend([
+                "📧 Email reading and management",
+                "📤 Email sending with attachments",
+                "🔍 Advanced email search and filtering"
+            ])
+        
+        if any('calendar' in name for name in tool_names):
+            capabilities.extend([
+                "📅 Calendar event management",
+                "⏰ Meeting scheduling and reminders",
+                "🗓️ Calendar search and organization"
+            ])
+        
+        if any('search' in name or 'web' in name for name in tool_names):
+            capabilities.extend([
+                "🔍 Advanced web search",
+                "🌐 Real-time information retrieval",
+                "📊 Data analysis and research"
+            ])
+        
+        if any('brevo' in name for name in tool_names):
+            capabilities.extend([
+                "📬 Transactional email management",
+                "👥 Contact list management",
+                "📊 Email campaign analytics"
+            ])
+        
+        # Agent-specific capabilities
+        if agent_id == "academic_coordinator":
+            capabilities.extend([
+                "🎓 Academic research guidance",
+                "📚 Literature review assistance",
+                "🔬 Research methodology advice"
+            ])
+        elif agent_id == "expert_web_searcher":
+            capabilities.extend([
+                "🧮 Mathematical calculations",
+                "📈 Data visualization",
+                "📋 Comprehensive reporting"
+            ])
+        elif agent_id == "story_expert":
+            capabilities.extend([
+                "✍️ Creative story writing",
+                "📖 Narrative development",
+                "🎭 Character creation"
+            ])
+        
+        # Default capabilities if none found
+        if not capabilities:
+            capabilities = [
+                "💬 Natural language conversation",
+                "🤖 AI-powered assistance",
+                "📝 Text generation and analysis"
+            ]
+        
+        return capabilities
+
+    def _get_agent_description(self, agent_id: str, agent_name: str) -> str:
+        """Get agent description based on agent type"""
+        descriptions = {
+            "academic_coordinator": "Specialized in academic research, literature review, and research methodology guidance",
+            "expert_web_searcher": "Advanced web search capabilities with data analysis and comprehensive reporting",
+            "brevo_expert": "Complete Brevo email platform integration for transactional emails and contact management",
+            "gmail_expert": "Full Gmail and Google Calendar integration for email management and scheduling",
+            "story_expert": "Creative writing assistant specialized in story development and narrative creation"
+        }
+        
+        return descriptions.get(agent_id, f"AI assistant powered by {agent_name} for various tasks")
+
 class SessionController:
     """Controller for session management operations"""
     

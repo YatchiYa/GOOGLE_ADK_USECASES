@@ -41,6 +41,11 @@ def create_routes(
         """List all available agents"""
         return agent_controller.list_agents()
 
+    @router.get("/agent/{agent_id}/details", response_model=AgentDetailResponse)
+    async def get_agent_details(agent_id: str):
+        """Get detailed information about a specific agent"""
+        return agent_controller.get_agent_details(agent_id)
+
     @router.post("/agent/{agent_id}", response_model=AgentResponse)
     async def call_agent(agent_id: str, request: AgentRequest):
         """Call a specific agent by ID (non-streaming)"""
